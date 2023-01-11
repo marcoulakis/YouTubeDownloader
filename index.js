@@ -2,41 +2,51 @@ const fs = require( 'fs');
 const yt = require("yt-converter");
 const search = require('youtube-search');
 const readline = require('readline-sync');
+const colors = require('colors');
+const cliProgress = require('cli-progress');
 
 const userInput = {};
 const jsonFullNameList = [];
 var opts = {
     maxResults: 1,
-    key: 'AIzaSyB_UXfXHV1NqOmyGDOegRDuSbidm4gEq9g'
+    key: 'AIzaSyC3xz6ysKge0xcz8SL0ZQyvLVtH5aLFVRU'
 };
 
-const askForWayToInput = () => {
-    const inputTypes = ['JSON file','Text input'];
-    const selectedInputTypesIndex = readline.keyInSelect(inputTypes, 'Choose the way that you want to input data: ');
-    const selectedInputTypesText = inputTypes[selectedInputTypesIndex]
+let processedFiles = 0;
 
-    return selectedInputTypesText;
+const askForWayToInput = () => {
+    const inputTypes = ['JSON file'.cyan,'Text input'.cyan];
+    const selectedInputTypesIndex = readline.keyInSelect(inputTypes, 'Choose the way that you want to input data: '.cyan, {cancel: "CANCEL".magenta, guide: false});
+
+    return selectedInputTypesIndex;
 }
 
 const askFoJsonPath = () => {
-    return readline.question('Type a the path for JSON file: ')
+    return readline.question('Type a the path for JSON file: '.cyan)
 }
 const askFoTheMusicInfo = () => {
-    userInput.musicName = readline.question('Type the name of the music: ').trim();
-    userInput.authorName = readline.question('Type the name of author of the music: ').trim();
-
+    userInput.musicName = readline.question('Type the name of the music: '.cyan).trim();
+    userInput.authorName = readline.question('Type the name of author of the music: '.cyan).trim();
+    console.log("")
 }
 
 const getAndProcessInputs = async () => {
-    userInput.type = askForWayToInput();
-    if(userInput.type === 'JSON file'){
+    userInput.type = askForWayToInput()
+    if(userInput.type === 0){
         const JsonFilePath = askFoJsonPath();
+        console.log("")
+        if(!JsonFilePath){
+            console.log('No JSON file selected!'.underline.red);
+            process.exit(9);
+        }
         const json = fs.readFile(JsonFilePath, 'utf8', function(err, data) {
+            if(err) return console.log(`${err.message}\n`.red);
 
             const parsedData = JSON.parse(data);
             parsedData.forEach(function (element) {
                 jsonFullNameList.push((element.MusicName + " - " + element.ArtistName).toString());
             })
+            userInput.size = jsonFullNameList.length;
             console.log(jsonFullNameList);
             jsonFullNameList.forEach(function (element) {
                 searchAndDownloadYoutubeMusic(element);
@@ -44,29 +54,76 @@ const getAndProcessInputs = async () => {
 
           });
         return json;
-    }else if(userInput.type === 'Text input'){
+    }else if(userInput.type === 1){
         askFoTheMusicInfo();
         userInput.fullNameFile = userInput.musicName + ' - ' + userInput.authorName;
+        userInput.size = 1;
         searchAndDownloadYoutubeMusic(userInput.fullNameFile);
+
     }
+
 };
+
+
+const multiBar = new cliProgress.MultiBar({
+    clearOnComplete: false,
+    hideCursor: true
+
+}, cliProgress.Presets.shades_grey);
+
+const singleBar = new cliProgress.SingleBar({
+    clearOnComplete: false,
+    hideCursor: true
+
+}, cliProgress.Presets.shades_grey);
+
+
+const updateDownloadProgressBar = (value, bar) => {
+    bar.increment();
+    bar.update(Math.floor(value));
+}
+
+const finishedDownload = (singleBar, fileName) => {
+    processedFiles++;
+    if(userInput.size === 1){
+        singleBar.stop();
+        console.log(`\n${fileName}.mp3 downloaded.`.green );
+    }else{
+        if(userInput.size != undefined && processedFiles == userInput.size){
+            jsonFullNameList.forEach(eachFileName => {
+                multiBar.stop();
+                console.log(`\n${eachFileName}.mp3 downloaded.`.green );
+            });
+        }
+    }
+    console.log("")
+
+}
 
 
 const searchAndDownloadYoutubeMusic = (input) => {
     search(input + ' lyrics', opts, function(err, results) {
-             
         if(err) return console.log(err);
         userInput.link = results[0].link;
+    
 
         try {
+            let b1;
+            if(userInput.size === 1){
+                b1 = singleBar;
+                b1.start()
+            }else{
+                b1 = multiBar.create(100, 0);
+            }
+
             return yt.convertAudio({
                     url: results[0].link,
                     itag: 140,
                     directoryDownload: __dirname + "/music/",
                     title: input
                 },
-                onData => console.log(onData),
-                onClose =>console.log(onClose)
+                onData => updateDownloadProgressBar(onData, b1),
+                onClose => finishedDownload(b1, input)
             );
         } catch (error) {
             console.error(error);
@@ -77,9 +134,8 @@ const searchAndDownloadYoutubeMusic = (input) => {
 ;
 }
 
-
 const Main = async () => {
-    getAndProcessInputs();
+    await getAndProcessInputs();
 }
 
 Main();
