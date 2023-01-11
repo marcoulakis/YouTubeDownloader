@@ -1,0 +1,24 @@
+{
+  "name": "youtube-downloader",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/marcoulakis/youtube-downloader.git",
+  "author": "marcoulakis",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "node-fetch": "2",
+    "nodemon": "^2.0.20",
+    "readline-sync": "^1.4.10",
+    "youtube-mp3-downloader": "^0.7.11",
+    "youtube-search": "^1.1.6",
+    "youtube-search-without-api-key": "^1.1.0",
+    "yt-converter": "^1.3.2",
+    "ytdl-core": "^4.11.2"
+  }
+}
