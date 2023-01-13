@@ -2,14 +2,16 @@ const fs = require( 'fs');
 const yt = require("yt-converter");
 const search = require('youtube-search');
 const readline = require('readline-sync');
-const colors = require('colors');
 const cliProgress = require('cli-progress');
+require('colors');
+require('dotenv').config()
+
 
 const userInput = {};
 const jsonFullNameList = [];
 var opts = {
     maxResults: 1,
-    key: 'AIzaSyC3xz6ysKge0xcz8SL0ZQyvLVtH5aLFVRU'
+    key: process.env.API_KEY || undefined
 };
 
 let processedFiles = 0;
@@ -46,12 +48,11 @@ const getAndProcessInputs = async () => {
             parsedData.forEach(function (element) {
                 jsonFullNameList.push((element.MusicName + " - " + element.ArtistName).toString());
             })
+            
             userInput.size = jsonFullNameList.length;
-            console.log(jsonFullNameList);
             jsonFullNameList.forEach(function (element) {
                 searchAndDownloadYoutubeMusic(element);
             })
-
           });
         return json;
     }else if(userInput.type === 1){
@@ -59,22 +60,18 @@ const getAndProcessInputs = async () => {
         userInput.fullNameFile = userInput.musicName + ' - ' + userInput.authorName;
         userInput.size = 1;
         searchAndDownloadYoutubeMusic(userInput.fullNameFile);
-
     }
-
 };
 
 
 const multiBar = new cliProgress.MultiBar({
     clearOnComplete: false,
     hideCursor: true
-
 }, cliProgress.Presets.shades_grey);
 
 const singleBar = new cliProgress.SingleBar({
     clearOnComplete: false,
     hideCursor: true
-
 }, cliProgress.Presets.shades_grey);
 
 
@@ -96,8 +93,7 @@ const finishedDownload = (singleBar, fileName) => {
             });
         }
     }
-    console.log("")
-
+    console.log("");
 }
 
 
@@ -106,7 +102,6 @@ const searchAndDownloadYoutubeMusic = (input) => {
         if(err) return console.log(err);
         userInput.link = results[0].link;
     
-
         try {
             let b1;
             if(userInput.size === 1){
@@ -129,9 +124,7 @@ const searchAndDownloadYoutubeMusic = (input) => {
             console.error(error);
             return error;
         }
-    })
-
-;
+    });
 }
 
 const Main = async () => {
