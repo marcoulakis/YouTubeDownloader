@@ -5,6 +5,7 @@ const readline = require('readline-sync');
 const cliProgress = require('cli-progress');
 require('colors');
 require('dotenv').config()
+const process = require('process');
 
 
 const userInput = {};
@@ -15,6 +16,14 @@ var opts = {
 };
 
 let processedFiles = 0;
+
+const askForKey = () =>{
+    opts.key = readline.question('\nType your YouTube API key: '.cyan).trim();
+    if(opts.key == ""){
+        console.log('No YouTube API key value!'.underline.red);
+        process.exit(9);
+    }
+}
 
 const askForWayToInput = () => {
     const inputTypes = ['JSON file'.cyan,'Text input'.cyan];
@@ -33,6 +42,9 @@ const askFoTheMusicInfo = () => {
 }
 
 const getAndProcessInputs = async () => {
+    if(opts.key === undefined){
+        askForKey()
+    }
     userInput.type = askForWayToInput()
     if(userInput.type === 0){
         const JsonFilePath = askFoJsonPath();
@@ -63,6 +75,11 @@ const getAndProcessInputs = async () => {
     }
 };
 
+const checkAndCreateMusicFolder = () => {
+    if (!fs.existsSync(process.cwd() + "/music/")) {
+        fs.mkdirSync(process.cwd() + "/music/");
+    }
+}
 
 const multiBar = new cliProgress.MultiBar({
     clearOnComplete: false,
@@ -98,6 +115,7 @@ const finishedDownload = (singleBar, fileName) => {
 
 
 const searchAndDownloadYoutubeMusic = (input) => {
+    checkAndCreateMusicFolder();
     search(input + ' lyrics', opts, function(err, results) {
         if(err) return console.log(err);
         userInput.link = results[0].link;
@@ -114,7 +132,7 @@ const searchAndDownloadYoutubeMusic = (input) => {
             return yt.convertAudio({
                     url: results[0].link,
                     itag: 140,
-                    directoryDownload: __dirname + "/music/",
+                    directoryDownload: process.cwd() + "/music/",
                     title: input
                 },
                 onData => updateDownloadProgressBar(onData, b1),

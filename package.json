@@ -1,7 +1,7 @@
 {
   "name": "youtube-downloader",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.0.1",
+  "main": "./ index.js",
   "repository": "https://github.com/marcoulakis/youtube-downloader.git",
   "author": "marcoulakis",
   "license": "MIT",
