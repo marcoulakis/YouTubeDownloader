@@ -13,6 +13,7 @@
     "colors": "^1.4.0",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
+    "ffmpeg": "^0.0.4",
     "node-fetch": "2",
     "readline-sync": "^1.4.10",
     "youtube-search": "^1.1.6",

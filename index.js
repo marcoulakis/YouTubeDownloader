@@ -55,8 +55,8 @@ const getAndProcessInputs = async () => {
         }
         const json = fs.readFile(JsonFilePath, 'utf8', function(err, data) {
             if(err) return console.log(`${err.message}\n`.red);
-
             const parsedData = JSON.parse(data);
+
             parsedData.forEach(function (element) {
                 jsonFullNameList.push((element.MusicName + " - " + element.ArtistName).toString());
             })
