@@ -2,8 +2,6 @@
 # **YouTube Downloader**
 YouTube Downloader is a Node.js command-line interface (CLI) program that allows you to download YouTube music videos as MP3 files. With this tool, you can easily convert your favorite music videos into audio files for offline listening.
 
----
-
 ## **Setting up**
 
 ### Setup the .env file like the example below:
